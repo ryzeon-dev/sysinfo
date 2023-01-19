@@ -1,0 +1,384 @@
+#!/usr/bin/python3
+
+import subprocess
+import argparse
+
+def remove(list, target):
+    i = 0
+    while i < len(list):
+        if list[i] == target:
+            list.pop(i)
+        else:
+            i += 1
+
+    return list
+
+def isIpv4(ip):
+    if ':' in ip:
+        return False
+
+    ipsplit = ip.split('.')
+    for octet in ipsplit:
+        try:
+            if int(octet) > 255:
+                return False
+        except:
+            return False
+    return True
+
+def upTime():
+    try:
+        uptime = (subprocess.getoutput('uptime')).split(' ')
+        uptime = remove(uptime, '')
+
+        time = uptime[2]
+        if ',' in uptime:
+            time = time[0:-1]
+
+        time = time.replace(',', '')
+        return green, time
+
+    except:
+        return None, None
+
+def localUsers():
+    try:
+        uptime = (subprocess.getoutput('uptime')).split(', ')
+        uptime = uptime[1]
+
+        uptime = uptime.split(' ')
+        uptime = remove(uptime, '')
+
+        users = uptime[0]
+        return green, users
+    
+    except:
+        return None, None
+    
+def totalRam():
+    try:
+        ram = subprocess.getoutput('free -m | grep Mem').split(' ')
+        ram = remove(ram, '')
+        ram = ram[1]
+
+        if int(ram) > 1024:
+            ram = str(int(ram)/1024)[0:4] + 'G'
+
+        else:
+            ram += 'M'
+        return ram
+    
+    except: 
+        return None
+
+def ramUsage():
+    try:
+        ram = subprocess.getoutput('free -m | grep Mem').split(' ')
+        ram = remove(ram, '')
+        usedRam = (int(ram[2])*100/int(ram[1]))
+
+        color = red if usedRam > 80 else green
+        return color, str(int(usedRam))[0:5] + '%'
+        
+    except: 
+        return None, None
+
+def totalSwap():
+    try:
+        swap = subprocess.getoutput('free -m | grep Swap').split(' ')
+        swap = remove(swap, '')
+        swap = swap[1]
+
+        if int(swap) > 1024:
+            swap = str(int(swap) / 1024)[0:4] + 'G'
+
+        else:
+            swap += 'M'
+
+        return swap
+        
+    except: 
+        return None
+
+def swapUsage():
+    try:
+        swap = subprocess.getoutput('free -m | grep Swap').split(' ')
+        swap = remove(swap, '')
+        usedSwap = int(swap[2])*100/int(swap[1])
+
+        color = red if usedSwap > 80 else green
+        return color, str(int(usedSwap))[0:5] + '%'
+
+    except: 
+        return None, None
+
+def totalStorage():
+    try:
+        storage = subprocess.getoutput('df -h / | grep /').split(' ')
+        storage = remove(storage, '')
+        return storage[1]
+    
+    except:
+        return None
+
+def usedStorage():
+    try:
+        storage = subprocess.getoutput('df -h / | grep /').split(' ')
+        storage = remove(storage, '')
+        storageUsage = storage[4]
+        
+        color = red if float(storageUsage[0:-1]) > 90 else green
+        return color, storageUsage
+    
+    except:
+        return None, None
+
+def ipAddresses():
+    try:
+        ipAddress = subprocess.getoutput('hostname -I').split(' ')
+        ips = []
+
+        for ip in ipAddress:
+            if isIpv4(ip):
+                ips.append(ip)
+        return '  '.join(ips)
+    
+    except:
+        return None
+
+def cpuUsage():
+    try:
+        cpuUsage = subprocess.getoutput('mpstat | grep all').split(' ')
+        cpuUsage = remove(cpuUsage, '')
+
+        cpuUsage = cpuUsage[cpuUsage.index('all')+1:-1]
+
+        totalUsage = 0
+        for value in cpuUsage:
+            totalUsage += float(value.replace(',', '.'))
+
+        color = red if totalUsage > 85 else green
+        return color, str(int(totalUsage)) + '%'
+
+    except:
+        return None, None
+
+def cpuTemperature():
+    try:
+        cpuTemperature = subprocess.getoutput('cat /sys/class/thermal/thermal_zone0/temp')
+        cpuTemperature = cpuTemperature[0:2]        
+
+        color = red if int(cpuTemperature) > 75 else green
+        return color, cpuTemperature + '°C'
+
+    except: 
+        return None, None
+
+def systemLoad():
+    try:
+        cpuLoad = (subprocess.getoutput('uptime')).split(' ')
+        cpuLoad = remove(cpuLoad, '')
+
+        index = cpuLoad.index('average:')
+        cpuLoad = cpuLoad[index+1]
+
+        if cpuLoad[-1] == ',':
+            cpuLoad = cpuLoad[0:-1]
+        cpuLoad = cpuLoad.replace(',', '.')
+
+        color = red if float(cpuLoad) > 85 else green
+        return color, cpuLoad + '%'
+
+    except:
+        return None, None
+
+def processesCount():
+    try:
+        processes = subprocess.getoutput('ps axu')
+        processes = processes.split('\n')
+
+        return str(len(processes)-1) 
+    except: 
+        return None
+            
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Linux system analysis tool',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='Execution with no argument will display all info\nIf some value cannot be retreived, it won\'t be shown'
+    )
+
+    parser.add_argument('-ut', action='store_true', help='Up time')
+    parser.add_argument('-lu', action='store_true', help='Local users')
+    parser.add_argument('-ap', action='store_true', help='Active processes')
+    parser.add_argument('-stu', action='store_true', help='Storage usage')
+    parser.add_argument('-stt', action='store_true', help='Total storage')
+    parser.add_argument('-ip', action='store_true', help='IP address')
+    parser.add_argument('-ru', action='store_true', help='RAM usage')
+    parser.add_argument('-rt', action='store_true', help='Total RAM')
+    parser.add_argument('-su', action='store_true', help='Swap usage')
+    parser.add_argument('-st', action='store_true', help='Total swap')
+    parser.add_argument('-cu', action='store_true', help='CPU usage')
+    parser.add_argument('-ct', action='store_true', help='CPU temperature')
+    parser.add_argument('-sl', action='store_true', help='System load')
+
+
+    args = parser.parse_args()
+
+    green = '\033[92m'
+    red = '\033[91m'
+    reset = '\033[00m'
+
+    output = ''
+    display = True
+    
+    if args.ut:
+        display = False
+        _, time = upTime()
+
+        if time is not None:
+            print(time)
+
+    if args.lu:
+        display = False
+        _, users = localUsers()
+
+        if users is not None:
+            print(users)
+
+    if args.stu:
+        display = False
+        _, usage = usedStorage()
+
+        if usage is not None:
+            print(usage)
+
+    if args.stt:
+        display = False
+        total = totalStorage()
+
+        if total is not None:
+            print(total)
+
+    if args.ru:
+        display = False
+        _, usage = ramUsage()
+
+        if usage is not None:
+            print(usage)
+
+    if args.rt:
+        display = False
+        total = totalRam()
+
+        if total is not None:
+            print(total)
+
+    if args.su:
+        display = False
+        _, usage = swapUsage()
+        
+        if usage is not None:
+            print(usage)
+
+    if args.st:
+        display = False
+        total = totalSwap()
+
+        if total is not None:
+            print(total)
+
+    if args.cu:
+        display = False
+        _, usage = cpuUsage()
+
+        if usage is not None:
+            print(usage)
+
+    if args.ct:
+        display = False
+        _, temperature = cpuTemperature()
+
+        if temperature is not None:
+            print(temperature)
+
+    if args.sl:
+        display = False
+        _, load = systemLoad()
+        
+        if load is not None:
+            print(load)
+
+    if args.ap:
+        display = False
+        count = processesCount()
+
+        if count is not None:
+            print(count)
+
+    if display:
+        line = ''
+        usersColor, users = localUsers()
+        if users is not None:
+            line += f'Local users: {usersColor}{users}{reset}\t\t'
+
+        timeColor, uptime = upTime()
+        if uptime is not None:
+            line += f'Up time: {timeColor}{uptime}{reset}\t  '
+
+        activeProcesses = processesCount()
+        if activeProcesses is not None:
+            line += f'Active processes: {green}{activeProcesses}{reset}'
+
+        if line:
+            print(line)
+
+        line = ''
+        color, storageUsage = usedStorage()
+        total = totalStorage()
+
+        if storageUsage is not None:
+            line += f'Usage of /: {green}{storageUsage}{reset} of {total}\t\t'
+
+        ips = ipAddresses()
+        if ips is not None:
+            line += f'IP address: {green}{ips}{reset}'
+
+        if line:
+            print(line)
+
+        line = ''
+        ramColor, ramUsage = ramUsage()
+        totalRam = totalRam()
+
+        if ramUsage is not None:
+             line += f'RAM usage: {ramColor}{ramUsage}{reset} of {totalRam}\t\t'
+
+        swapColor, swapUsage = swapUsage()
+        totalSwap = totalSwap()
+
+        if swapUsage is not None:
+            line += f'Swap usage: {swapColor}{swapUsage}{reset} of {totalSwap}'
+
+        if line:
+            print(line)
+
+        line = ''
+        cpuTempColor, cpuTemp = cpuTemperature()
+        if cpuTemp is not None:
+            line += f'CPU temperature: {cpuTempColor}{cpuTemp}{reset}\t'
+
+        cpuUsageColor, cpuUsage = cpuUsage()
+        if cpuUsage is not None:
+            if line:
+                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t\t'
+
+            else:
+                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t'
+
+        loadColor, load = systemLoad()
+        if load is not None:
+            line += f'System load: {loadColor}{load}{reset}'
+
+        if line:
+            print(line)
