@@ -158,7 +158,7 @@ def cpuUsage():
             totalUsage += float(value.replace(',', '.'))
 
         color = red if totalUsage > 85 else green
-        return color, str(totalUsage)[0:5]
+        return color, str(int(totalUsage)) + '%'
 
     except:
         return None, None
@@ -169,7 +169,7 @@ def cpuTemperature():
         cpuTemperature = cpuTemperature[0:2]        
 
         color = red if int(cpuTemperature) > 75 else green
-        return color, cpuTemperature
+        return color, cpuTemperature + '°C'
 
     except: 
         return None, None
@@ -366,15 +366,15 @@ if __name__ == '__main__':
         line = ''
         cpuTempColor, cpuTemp = cpuTemperature()
         if cpuTemp is not None:
-            line += f'CPU temperature: {cpuTempColor}{cpuTemp}°C{reset}\t'
+            line += f'CPU temperature: {cpuTempColor}{cpuTemp}{reset}\t'
 
         cpuUsageColor, cpuUsage = cpuUsage()
         if cpuUsage is not None:
             if line:
-                line += f'CPU usage: {cpuUsageColor}{cpuUsage}%{reset}\t\t'
+                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t\t'
 
             else:
-                line += f'CPU usage: {cpuUsageColor}{cpuUsage}%{reset}\t'
+                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t'
 
         loadColor, load = systemLoad()
         if load is not None:
