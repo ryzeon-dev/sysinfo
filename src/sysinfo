@@ -207,7 +207,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Linux system analysis tool',
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='Execution with no argument will display all info\nIf some value cannot be retreived, it won\'t be shown'
+        epilog='Execution with no argument will display all info\nMore than one argument can be specified\nIf some value cannot be retreived, it won\'t be shown'
     )
 
     parser.add_argument('-ut', action='store_true', help='Up time')
