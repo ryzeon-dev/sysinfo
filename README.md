@@ -1,7 +1,11 @@
 # sysinfo
 - Linux system analysis tool 
 
+## Download
+- Packages can be found [here](https://github.com/cpy-dev/sysinfo/releases/)
+
 ## Usage
+- CPU usage scanning requires sysstat package to be installed on the system
 - Information can be displayed all at once, or separately by using arguments
   
       $ sysinfo
