@@ -182,12 +182,14 @@ def systemLoad():
         index = cpuLoad.index('average:')
         cpuLoad = cpuLoad[index+1]
 
+        cpuCount = subprocess.getoutput('grep -c processor /proc/cpuinfo')
+
         if cpuLoad[-1] == ',':
             cpuLoad = cpuLoad[0:-1]
         cpuLoad = cpuLoad.replace(',', '.')
-
+        cpuLoad = float(cpuLoad)*100/int(cpuCount)
         color = red if float(cpuLoad) > 85 else green
-        return color, cpuLoad + '%'
+        return color, str(int(cpuLoad)) + '%'
 
     except:
         return None, None
