@@ -16,7 +16,7 @@
 
 - Information and relative argument (arguments can be combined):
 
-      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl] [-cs] [-hn] [-k]
+      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl] [-cs] [-hn] [-k] [-cr] [-csw]
       
       Linux system analysis tool
       
@@ -38,6 +38,8 @@
         -cs         Current session
         -hn         Host name
         -k          Kernel
+        -cr         Cached RAM
+        -csw        Cached Swap
       
       Execution with no argument will display all info
       More than one argument can be specified

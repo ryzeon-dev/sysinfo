@@ -240,7 +240,23 @@ def kernel():
 
     except:
         return None
-            
+
+def cachedRam():
+    try:
+        cached = subprocess.getoutput("cat /proc/meminfo | grep ^Cached | awk '{ print $2 }'")
+        return str(int(int(cached)/1024)) + 'M'
+
+    except:
+        return None
+
+def cachedSwap():
+    try:
+        cachedSw = subprocess.getoutput("cat /proc/meminfo | grep SwapCached | awk '{ print $2 }'")
+        return str(int(int(cachedSw)/1024)) + 'M'
+
+    except:
+        return None
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Linux system analysis tool',
@@ -264,6 +280,9 @@ if __name__ == '__main__':
     parser.add_argument('-cs', action='store_true', help='Current session')
     parser.add_argument('-hn', action='store_true', help='Host name')
     parser.add_argument('-k',  action='store_true', help='Kernel')
+    parser.add_argument('-cr', action='store_true', help='Cached RAM')
+    parser.add_argument('-csw', action='store_true', help='Cached Swap')
+
 
     args = parser.parse_args()
 
@@ -372,7 +391,7 @@ if __name__ == '__main__':
 
         timeColor, uptime = upTime()
         if uptime is not None:
-            line += f'Up time: {timeColor}{uptime}{reset}\t\t'
+            line += f'Up time: {timeColor}{uptime}{reset}\t'
 
         session = currentSession()
         if session is not None:
@@ -397,7 +416,7 @@ if __name__ == '__main__':
         line = ''
         host = hostName()
         if host is not None:
-            line += f'Host name: {green}{host}{reset}\t\t'
+            line += f'Host name: {green}{host}{reset}\t\t\t'
 
         ips = ipAddresses()
         if ips is not None:
@@ -409,15 +428,25 @@ if __name__ == '__main__':
         line = ''
         ramColor, ramUsage = ramUsage()
         totalRam = totalRam()
-
         if ramUsage is not None:
              line += f'RAM usage: {ramColor}{ramUsage}{reset} of {totalRam}\t\t'
 
+        cachedRAM = cachedRam()
+        if cachedRAM is not None:
+            line += f'Cached RAM: {green}{cachedRAM}{reset}'
+
+        if line:
+            print(line)
+
+        line = ''
         swapColor, swapUsage = swapUsage()
         totalSwap = totalSwap()
-
         if swapUsage is not None:
-            line += f'Swap usage: {swapColor}{swapUsage}{reset} of {totalSwap}'
+            line += f'Swap usage: {swapColor}{swapUsage}{reset} of {totalSwap}\t\t'
+
+        cachedSwap = cachedSwap()
+        if cachedSwap is not None:
+            line += f'Cached Swap: {green}{cachedSwap}{reset}'
 
         if line:
             print(line)
