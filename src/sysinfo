@@ -8,6 +8,7 @@ def remove(list, target):
     while i < len(list):
         if list[i] == target:
             list.pop(i)
+
         else:
             i += 1
 
@@ -22,6 +23,7 @@ def isIpv4(ip):
         try:
             if int(octet) > 255:
                 return False
+
         except:
             return False
     return True
@@ -165,12 +167,24 @@ def cpuUsage():
 
 def cpuTemperature():
     try:
-        cpuTemperature = subprocess.getoutput('cat /sys/class/thermal/thermal_zone0/temp')
-        cpuTemperature = cpuTemperature[0:2]        
+        thermalType = subprocess.getoutput('cat /sys/class/thermal/thermal_zone*/type')
+        thermalType = thermalType.split('\n')
 
-        color = red if int(cpuTemperature) > 75 else green
-        return color, cpuTemperature + '°C'
+        index = None
+        for i, zone in enumerate(thermalType):
+            if 'cpu' in zone:
+                index = i
+                break
+                
+        if index is not None:
+            cpuTemperature = subprocess.getoutput(f'cat /sys/class/thermal/thermal_zone{index}/temp')
+            cpuTemperature = cpuTemperature[0:2]        
 
+            color = red if int(cpuTemperature) > 75 else green
+            return color, cpuTemperature + '°C'
+
+        else:
+            return None, None
     except: 
         return None, None
 
@@ -202,6 +216,30 @@ def processesCount():
         return str(len(processes)-1) 
     except: 
         return None
+
+def currentSession():
+    try:
+        session = subprocess.getoutput('tty')
+        return session
+
+    except:
+        return None
+
+def hostName():
+    try:
+        host = subprocess.getoutput('uname -n')
+        return host
+
+    except:
+        return None
+
+def kernel():
+    try:
+        kernel = subprocess.getoutput('uname -r')
+        return kernel
+
+    except:
+        return None
             
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -223,7 +261,9 @@ if __name__ == '__main__':
     parser.add_argument('-cu', action='store_true', help='CPU usage')
     parser.add_argument('-ct', action='store_true', help='CPU temperature')
     parser.add_argument('-sl', action='store_true', help='System load')
-
+    parser.add_argument('-cs', action='store_true', help='Current session')
+    parser.add_argument('-hn', action='store_true', help='Host name')
+    parser.add_argument('-k',  action='store_true', help='Kernel')
 
     args = parser.parse_args()
 
@@ -231,7 +271,6 @@ if __name__ == '__main__':
     red = '\033[91m'
     reset = '\033[00m'
 
-    output = ''
     display = True
     
     if args.ut:
@@ -318,6 +357,13 @@ if __name__ == '__main__':
         if count is not None:
             print(count)
 
+    if args.cs:
+        display = False
+        session = currentSession()
+
+        if session is not None:
+            print(session)
+            
     if display:
         line = ''
         usersColor, users = localUsers()
@@ -326,21 +372,32 @@ if __name__ == '__main__':
 
         timeColor, uptime = upTime()
         if uptime is not None:
-            line += f'Up time: {timeColor}{uptime}{reset}\t  '
+            line += f'Up time: {timeColor}{uptime}{reset}\t\t'
 
-        activeProcesses = processesCount()
-        if activeProcesses is not None:
-            line += f'Active processes: {green}{activeProcesses}{reset}'
+        session = currentSession()
+        if session is not None:
+            line += f'Current session: {green}{session}{reset}'
 
         if line:
             print(line)
 
         line = ''
+        kernel = kernel()
+        if kernel is not None:
+            line += f'Kernel: {green}{kernel}{reset}\t\t'
+
         color, storageUsage = usedStorage()
         total = totalStorage()
-
         if storageUsage is not None:
-            line += f'Usage of /: {green}{storageUsage}{reset} of {total}\t\t'
+            line += f'Usage of /: {green}{storageUsage}{reset} of {total}'
+
+        if line:
+            print(line)
+
+        line = ''
+        host = hostName()
+        if host is not None:
+            line += f'Host name: {green}{host}{reset}\t\t'
 
         ips = ipAddresses()
         if ips is not None:
@@ -366,17 +423,21 @@ if __name__ == '__main__':
             print(line)
 
         line = ''
-        cpuTempColor, cpuTemp = cpuTemperature()
-        if cpuTemp is not None:
-            line += f'CPU temperature: {cpuTempColor}{cpuTemp}{reset}\t'
-
         cpuUsageColor, cpuUsage = cpuUsage()
         if cpuUsage is not None:
-            if line:
-                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t\t'
+            line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t\t\t'
 
-            else:
-                line += f'CPU usage: {cpuUsageColor}{cpuUsage}{reset}\t'
+        cpuTempColor, cpuTemp = cpuTemperature()
+        if cpuTemp is not None:
+            line += f'CPU temperature: {cpuTempColor}{cpuTemp}{reset}'
+
+        if line:
+            print(line)
+
+        line = ''
+        activeProcesses = processesCount()
+        if activeProcesses is not None:
+            line += f'Active processes: {green}{activeProcesses}{reset}\t\t'
 
         loadColor, load = systemLoad()
         if load is not None:

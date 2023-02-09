@@ -1,8 +1,10 @@
- # sysinfo
+# sysinfo
 - Linux system analysis tool 
 
 ## Download
-- Packages can be found [here](https://github.com/cpy-dev/sysinfo/releases/)
+- Just clone this repo
+
+      $ git clone https://github.com/cpy-dev/sysinfo.git 
 
 ## Usage
 - The tool requires Python3 to be installed
@@ -14,7 +16,7 @@
 
 - Information and relative argument (arguments can be combined):
 
-      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl]
+      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl] [-cs] [-hn] [-k]
       
       Linux system analysis tool
       
@@ -33,6 +35,10 @@
         -cu         CPU usage
         -ct         CPU temperature
         -sl         System load
-
+        -cs         Current session
+        -hn         Host name
+        -k          Kernel
+      
       Execution with no argument will display all info
+      More than one argument can be specified
       If some value cannot be retreived, it won't be shown
