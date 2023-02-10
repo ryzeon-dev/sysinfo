@@ -282,7 +282,7 @@ if __name__ == '__main__':
     parser.add_argument('-k',  action='store_true', help='Kernel')
     parser.add_argument('-cr', action='store_true', help='Cached RAM')
     parser.add_argument('-csw', action='store_true', help='Cached Swap')
-
+    parser.add_argument('--pretty', action='store_true', help='When combined with options, shows them with full description')
 
     args = parser.parse_args()
 
@@ -294,24 +294,33 @@ if __name__ == '__main__':
     
     if args.ut:
         display = False
-        _, time = upTime()
+        color, time = upTime()
 
         if time is not None:
-            print(time)
+            if args.pretty:
+                print(f'Up time: {color}{time}{reset}')
+            else:
+                print(time)
 
     if args.lu:
         display = False
-        _, users = localUsers()
+        color, users = localUsers()
 
         if users is not None:
-            print(users)
+            if args.pretty:
+                print(f'Local users: {color}{users}{reset}')
+            else:        
+                print(users)
 
     if args.stu:
         display = False
-        _, usage = usedStorage()
+        color, usage = usedStorage()
 
         if usage is not None:
-            print(usage)
+            if args.pretty:
+                print(f'Usage of /: {color}{usage}{reset} of {totalStorage()}')
+            else:
+                print(usage)
 
     if args.stt:
         display = False
@@ -322,10 +331,13 @@ if __name__ == '__main__':
 
     if args.ru:
         display = False
-        _, usage = ramUsage()
+        color, usage = ramUsage()
 
         if usage is not None:
-            print(usage)
+            if args.pretty:
+                print(f'RAM usage: {color}{usage}{reset} of {totalRam()}')
+            else:
+                print(usage)
 
     if args.rt:
         display = False
@@ -336,10 +348,13 @@ if __name__ == '__main__':
 
     if args.su:
         display = False
-        _, usage = swapUsage()
+        color, usage = swapUsage()
         
         if usage is not None:
-            print(usage)
+            if args.pretty:
+                print(f'Swap usage: {color}{usage}{reset} of {totalSwap()}')
+            else:
+                print(usage)
 
     if args.st:
         display = False
@@ -350,38 +365,103 @@ if __name__ == '__main__':
 
     if args.cu:
         display = False
-        _, usage = cpuUsage()
+        color, usage = cpuUsage()
 
         if usage is not None:
-            print(usage)
+            if args.pretty:
+                print(f'CPU usage: {color}{usage}{reset}')
+            else:        
+                print(usage)
 
     if args.ct:
         display = False
-        _, temperature = cpuTemperature()
+        color, temperature = cpuTemperature()
 
         if temperature is not None:
-            print(temperature)
+            if args.pretty:
+                print(f'CPU temperature: {color}{temperature}{reset}')
+            else:
+                print(temperature)
 
     if args.sl:
         display = False
-        _, load = systemLoad()
+        color, load = systemLoad()
         
         if load is not None:
-            print(load)
+            if args.pretty:
+                print(f'System load: {color}{load}{reset}')
+            else:
+                print(load)
 
     if args.ap:
         display = False
         count = processesCount()
 
         if count is not None:
-            print(count)
+            if args.pretty:
+                print(f'Active processes: {green}{count}{reset}')
+            else:
+                print(count)
 
     if args.cs:
         display = False
         session = currentSession()
 
         if session is not None:
-            print(session)
+            if args.pretty:
+                print(f'Current session: {green}{session}{reset}')
+            else:
+                print(session)
+
+    if args.cr:
+        display = False
+        cachedRAM = cachedRam()
+
+        if cachedRAM is not None:
+            if args.pretty:
+                print(f'Cached RAM: {green}{cachedRAM}{reset}')
+            else:
+                print(cachedRAM)
+
+    if args.ip:
+        display = False
+        ip = ipAddresses()
+
+        if ip is not None:
+            if args.pretty:
+                print(f'IP address: {green}{ip}{reset}')
+            else:
+                print(ip)
+
+    if args.csw:    
+        display = False
+        cachedSwap = cachedSwap()
+
+        if cachedSwap is not None:
+            if args.pretty:
+                print(f'Cached swap: {green}{cachedSwap}{reset}')
+            else:
+                print(cachedSwap)
+
+    if args.hn:
+        display = False
+        hostName = hostName()
+
+        if hostName is not None:
+            if args.pretty:
+                print(f'Host name: {green}{hostName}{reset}')
+            else:
+                print(hostName)
+
+    if args.k:
+        display = False
+        kernel = kernel()
+
+        if hostName is not None:
+            if args.pretty:
+                print(f'Kernel: {green}{kernel}{reset}')
+            else:
+                print(kernel)
             
     if display:
         line = ''

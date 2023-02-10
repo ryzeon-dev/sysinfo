@@ -16,31 +16,32 @@
 
 - Information and relative argument (arguments can be combined):
 
-      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl] [-cs] [-hn] [-k] [-cr] [-csw]
-      
-      Linux system analysis tool
-      
-      options:
-        -h, --help  show this help message and exit
-        -ut         Up time
-        -lu         Local users
-        -ap         Active processes
-        -stu        Storage usage
-        -stt        Total storage
-        -ip         IP address
-        -ru         RAM usage
-        -rt         Total RAM
-        -su         Swap usage
-        -st         Total swap
-        -cu         CPU usage
-        -ct         CPU temperature
-        -sl         System load
-        -cs         Current session
-        -hn         Host name
-        -k          Kernel
-        -cr         Cached RAM
-        -csw        Cached Swap
-      
-      Execution with no argument will display all info
-      More than one argument can be specified
-      If some value cannot be retreived, it won't be shown
+      usage: sysinfo [-h] [-ut] [-lu] [-ap] [-stu] [-stt] [-ip] [-ru] [-rt] [-su] [-st] [-cu] [-ct] [-sl] [-cs] [-hn] [-k] [-cr] [-csw] [--pretty]
+
+	  Linux system analysis tool
+
+	  options:
+		  -h, --help  show this help message and exit
+		  -ut         Up time
+		  -lu         Local users
+	 	  -ap         Active processes
+	      -stu        Storage usage
+		  -stt        Total storage
+		  -ip         IP address
+		  -ru         RAM usage
+		  -rt         Total RAM
+		  -su         Swap usage
+		  -st         Total swap
+		  -cu         CPU usage
+		  -ct         CPU temperature
+		  -sl         System load
+		  -cs         Current session
+		  -hn         Host name
+		  -k          Kernel
+		  -cr         Cached RAM
+		  -csw        Cached Swap
+		  --pretty    When combined with options, shows them with full description
+
+	Execution with no argument will display all info
+	More than one argument can be specified
+	If some value cannot be retreived, it won't be shown
