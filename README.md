@@ -2,7 +2,9 @@
 - Linux system analysis tool 
 
 ## Download
-- Just clone this repo
+- Get latest version from [releases](https://github.com/cpy-dev/sysinfo/releases)
+
+- Or just clone this repo
 
       $ git clone https://github.com/cpy-dev/sysinfo.git 
 
