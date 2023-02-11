@@ -47,3 +47,15 @@
 	Execution with no argument will display all info
 	More than one argument can be specified
 	If some value cannot be retreived, it won't be shown
+
+# Example
+- Example run on BananaPi M64
+
+
+		Local users: 2     Up time: 2:02	Current session: /dev/pts/0
+		Kernel: 6.1.7-sunxi64		Usage of /: 14% of 58G
+		Host name: m64		IP address: 10.7.0.1  192.168.1.32
+		RAM usage: 17% of 1.94G	Cached RAM: 262M
+		Swap usage: 0% of 994M	Cached Swap: 0M
+		CPU usage: 3%			CPU temperature: 40°C
+		Active processes: 151		System load: 5%
