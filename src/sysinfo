@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
 import subprocess
+from subprocess import getoutput as terminal
 import argparse
+import psutil
 
 def remove(list, target):
     i = 0
@@ -30,28 +32,17 @@ def isIpv4(ip):
 
 def upTime():
     try:
-        uptime = (subprocess.getoutput('uptime')).split(' ')
-        uptime = remove(uptime, '')
+        uptime = terminal('uptime -p').replace('up', '')
+        uptime = uptime.replace(',', '')
 
-        time = uptime[2]
-        if ',' in uptime:
-            time = time[0:-1]
-
-        time = time.replace(',', '')
-        return green, time
+        return green, uptime
 
     except:
         return None, None
 
 def localUsers():
     try:
-        uptime = (subprocess.getoutput('uptime')).split(', ')
-        uptime = uptime[1]
-
-        uptime = uptime.split(' ')
-        uptime = remove(uptime, '')
-
-        users = uptime[0]
+        users = terminal("uptime | awk -F ',' '{ print $2  }'").strip()
         return green, users
     
     except:
@@ -59,15 +50,8 @@ def localUsers():
     
 def totalRam():
     try:
-        ram = subprocess.getoutput('free -m | grep Mem').split(' ')
-        ram = remove(ram, '')
-        ram = ram[1]
-
-        if int(ram) > 1024:
-            ram = str(int(ram)/1024)[0:4] + 'G'
-
-        else:
-            ram += 'M'
+        ram = terminal("cat /proc/meminfo | grep MemTotal | awk -F ':' '{ print $2 }' | "
+                       "awk '{ printf \"%.2f GB\", $1 / 1024 / 1024 }'").strip()
         return ram
     
     except: 
@@ -75,27 +59,21 @@ def totalRam():
 
 def ramUsage():
     try:
-        ram = subprocess.getoutput('free -m | grep Mem').split(' ')
-        ram = remove(ram, '')
-        usedRam = (int(ram[2])*100/int(ram[1]))
+        ramUsage = terminal("echo $(cat /proc/meminfo | grep MemTotal | awk -F ':' '{ print $2 }'  | "
+                            "awk '{ print $1 }' && cat /proc/meminfo | grep MemAvailable | awk -F ':' '{ print $2 }' | "
+                            "awk '{ print $1 }') | awk '{ printf \"%.2f%s\", ($1 - $2) / $1 * 100, \"%\" }'")
 
-        color = red if usedRam > 80 else green
-        return color, str(int(usedRam))[0:5] + '%'
-        
-    except: 
+        color = green
+        if float(ramUsage.replace('%', '').replace(',', '.')) > 75:
+            color = red
+        return color, ramUsage
+
+    except:
         return None, None
 
 def totalSwap():
     try:
-        swap = subprocess.getoutput('free -m | grep Swap').split(' ')
-        swap = remove(swap, '')
-        swap = swap[1]
-
-        if int(swap) > 1024:
-            swap = str(int(swap) / 1024)[0:4] + 'G'
-
-        else:
-            swap += 'M'
+        swap = terminal('cat /proc/meminfo | grep "SwapTotal" | awk \'{ printf "%.2f", $2 / 1024 / 1024 }\'') + ' GB'
 
         return swap
         
@@ -104,12 +82,12 @@ def totalSwap():
 
 def swapUsage():
     try:
-        swap = subprocess.getoutput('free -m | grep Swap').split(' ')
-        swap = remove(swap, '')
-        usedSwap = int(swap[2])*100/int(swap[1])
+        swap = terminal('echo $(cat /proc/meminfo | grep SwapTotal | awk \'{ print $2 }\' && cat /proc/meminfo | '
+                         'grep SwapFree | awk \'{ print $2 }\') | awk \'{ printf "%d%s", $1 ? ($1 - $2) * 100'
+                         ' / $1 : 0, "%" }\'')
 
-        color = red if usedSwap > 80 else green
-        return color, str(int(usedSwap))[0:5] + '%'
+        color = red if float(swap.replace('%', '').replace(',', '.')) > 80 else green
+        return color, swap
 
     except: 
         return None, None
@@ -137,55 +115,35 @@ def usedStorage():
 
 def ipAddresses():
     try:
-        ipAddress = subprocess.getoutput('hostname -I').split(' ')
-        ips = []
+        ipAddress = terminal("echo $(ip a | grep inet -w | awk '{ print $2 }' | awk -F '/' '{ print $1 }') | "
+                             "awk -F '127.0.0.1' '{ print $2 }'").strip()
 
-        for ip in ipAddress:
-            if isIpv4(ip):
-                ips.append(ip)
-        return '  '.join(ips)
+        return ipAddress
     
     except:
         return None
 
 def cpuUsage():
     try:
-        cpuUsage = subprocess.getoutput('mpstat | grep all').split(' ')
-        cpuUsage = remove(cpuUsage, '')
+        cpuUsage = psutil.cpu_percent()
 
-        cpuUsage = cpuUsage[cpuUsage.index('all')+1:-1]
-
-        totalUsage = 0
-        for value in cpuUsage:
-            totalUsage += float(value.replace(',', '.'))
-
-        color = red if totalUsage > 85 else green
-        return color, str(int(totalUsage)) + '%'
+        color = red if cpuUsage > 85 else green
+        return color, str(int(cpuUsage)) + '%'
 
     except:
         return None, None
 
 def cpuTemperature():
     try:
-        thermalType = subprocess.getoutput('cat /sys/class/thermal/thermal_zone*/type')
-        thermalType = thermalType.split('\n')
+        temperatures = psutil.sensors_temperatures()
+        key = list(temperatures.keys())[0]
 
-        index = None
-        for i, zone in enumerate(thermalType):
-            if 'cpu' in zone:
-                index = i
-                break
-                
-        if index is not None:
-            cpuTemperature = subprocess.getoutput(f'cat /sys/class/thermal/thermal_zone{index}/temp')
-            cpuTemperature = cpuTemperature[0:2]        
+        cpuTemperature = temperatures[key][0].current
 
-            color = red if int(cpuTemperature) > 75 else green
-            return color, cpuTemperature + '°C'
+        color = red if int(cpuTemperature) > 75 else green
+        return color, str(round(cpuTemperature)) + '°C'
 
-        else:
-            return None, None
-    except: 
+    except Exception as e:
         return None, None
 
 def systemLoad():
@@ -496,7 +454,7 @@ if __name__ == '__main__':
         line = ''
         host = hostName()
         if host is not None:
-            line += f'Host name: {green}{host}{reset}\t\t\t'
+            line += f'Host name: {green}{host}{reset}\t\t'
 
         ips = ipAddresses()
         if ips is not None:
@@ -509,7 +467,7 @@ if __name__ == '__main__':
         ramColor, ramUsage = ramUsage()
         totalRam = totalRam()
         if ramUsage is not None:
-             line += f'RAM usage: {ramColor}{ramUsage}{reset} of {totalRam}\t\t'
+             line += f'RAM usage: {ramColor}{ramUsage}{reset} of {totalRam}\t'
 
         cachedRAM = cachedRam()
         if cachedRAM is not None:
@@ -522,7 +480,7 @@ if __name__ == '__main__':
         swapColor, swapUsage = swapUsage()
         totalSwap = totalSwap()
         if swapUsage is not None:
-            line += f'Swap usage: {swapColor}{swapUsage}{reset} of {totalSwap}\t\t'
+            line += f'Swap usage: {swapColor}{swapUsage}{reset} of {totalSwap}\t'
 
         cachedSwap = cachedSwap()
         if cachedSwap is not None:
